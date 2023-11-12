@@ -191,5 +191,30 @@ async function getTokens(obj, tokenAddress) {
 }
 
 // add function to get tokenName and tokenDecimals
+async function testABI(tokenAddress) {
+  const proxyContract = new starknet.Contract(abi, tokenAddress, provider);
+
+  console.log("proxyContract =", proxyContract.abi);
+
+  const nameInDecimal = await proxyContract.name();
+  const decimalsNo = await proxyContract.decimals();
+
+  const hexName = nameInDecimal.name.toString(16);
+
+  const tokenName = Buffer.from(hexName, "hex").toString("utf8");
+  console.log(tokenName);
+
+  const tokenDecimals = Number(decimalsNo.decimals);
+  console.log(tokenDecimals);
+
+  const data = {
+    tokenName,
+    tokenDecimals,
+  };
+
+  return data;
+}
+
+
 
 module.exports = { debugTransactions, testABI };
