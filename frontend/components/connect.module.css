@@ -1,0 +1,8 @@
+.connectbtn {
+    background-color: #008FB9;
+    height: 50px;
+    width: 120px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+}

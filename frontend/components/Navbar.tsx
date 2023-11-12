@@ -1,5 +1,6 @@
 // components/Navbar.js
 import Link from "next/link";
+import Connect from "@/components/Connect";
 
 const Navbar = () => {
   return (
@@ -16,12 +17,13 @@ const Navbar = () => {
           </div>
           <div className="flex items-center">
             {/* Other navbar items */}
-            <Link
+            {/* <Link
               className="inline-block bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               href="/connect"
             >
               Connect Wallet
-            </Link>
+            </Link> */}
+            <Connect />
           </div>
         </div>
       </div>
