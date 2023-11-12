@@ -2,6 +2,7 @@ const starknet = require("starknet");
 const router = require("./router.json");
 const abi = require("./abi.json");
 const { ethers } = require("ethers");
+const { callOracle } = require("./callContract");
 
 const provider = new starknet.RpcProvider({
   nodeUrl:
@@ -28,9 +29,7 @@ async function getEventsFromChain(tokenAddress) {
       },
       address: tokenAddress,
       keys: [
-        [
-          "0x99cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9",
-        ],
+        ["0x99cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9"],
       ],
       chunk_size: 100,
       // continuation_token: continuationToken,
@@ -124,7 +123,7 @@ async function debugTransactions(req, res) {
   const obj = { token0Obj, token1Obj };
 
   const data = await getTokens(obj, req.query.tokenAddress);
-
+  callOracle(req.query.tokenAddress, data.isHoneyPot);
   res.status(200).json({ data, transaction: transactions[0].transaction_hash });
 }
 
@@ -185,7 +184,7 @@ async function getTokens(obj, tokenAddress) {
     token1: token1Data.tokenName,
     tax,
     isHoneyPot: honepotStatus,
-    tokenAddress : tokenAddress
+    tokenAddress: tokenAddress,
   };
 }
 
@@ -214,15 +213,12 @@ async function testABI(tokenAddress) {
   return data;
 }
 
-async function honeyPotCheck(tax){
-  if(tax > 40){
+async function honeyPotCheck(tax) {
+  if (tax > 40) {
     return true;
   } else {
     return false;
   }
 }
-
-
-
 
 module.exports = { debugTransactions, testABI };
