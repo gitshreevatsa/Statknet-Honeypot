@@ -28,6 +28,13 @@ This oracle can also be used on tokens that are not honeypot but have chances of
 - Cairo
 
 ## Setup 
+
+We have hosted an instance to the web If you use that u can skip to Curl Commands
+
+Use the URL 
+```
+http://a33ahet2k9aebelatvvmrt0f0c.ingress.palmito.duckdns.org/
+```
 Clone the repository with this command or run it on codespaces
 ```gh repo clone gitshreevatsa/Statknet-Honeypot```
 run the command 
@@ -35,11 +42,23 @@ run the command
 cd backend
 npx nodemon
 ```
+or 
+
+```
+docker pull muskbuster/honeypot
+```
+```
+docker run -p 8000:8000 -d muskbuster/honeypot:v1
+```
 this will start the instance of honeypot detector in your localhost and has one endpoint 
 you can call the endpoint using curl
 ```bash
 curl "http://localhost:8000/?tokenAddress=<ADDRESS_OF_TOKEN>"
 
+```
+or 
+```bash
+curl "http://a33ahet2k9aebelatvvmrt0f0c.ingress.palmito.duckdns.org/?tokenAddress=<ADDRESS_OF_TOKEN>"
 ```
 Response will be of type json
 ```json
