@@ -74,6 +74,10 @@ This will return the status of a token stating if it is a honeypot or not
 ## Usage 
 We have deployed a frontend for the detector which is directly connected to our Oracle aswell.You can simply input the address of the token you want to learn about and get to know if it is a honeypot token or not.
 This can be used by the public to conduct their due-diligence for a token.
+Go to website -  https://statknet-honeypot.vercel.app/
+
+![image](https://github.com/gitshreevatsa/Statknet-Honeypot/assets/81912496/2ba73b14-49c8-4cbb-b8ee-01bf8667cb9f)
+
 
 To integrate the Oracle You can simply call the get_if_honeypot function at the address 
 
