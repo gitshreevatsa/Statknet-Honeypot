@@ -215,6 +215,15 @@ async function testABI(tokenAddress) {
   return data;
 }
 
+async function honeyPotCheck(tax){
+  if(tax > 40){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 
 
 module.exports = { debugTransactions, testABI };
