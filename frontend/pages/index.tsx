@@ -24,7 +24,7 @@ const Home: React.FC = () => {
 
     try {
       const response = await axios.get<ApiResponse>(
-        `http://qoc2vc2k09aab538plivjaje90.ingress.palmito.duckdns.org/?tokenAddress=${contractAddress}`
+        `http://localhost:8000/?tokenAddress=${contractAddress}`
       );
       setResponseData(response.data);
     } catch (error) {
