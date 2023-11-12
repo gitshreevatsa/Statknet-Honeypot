@@ -1,0 +1,7 @@
+version: '3'
+services:
+  honeypot:
+    image: muskbuster/honeypot:v2
+    ports:
+      - "8000:8000"
+    restart: always
