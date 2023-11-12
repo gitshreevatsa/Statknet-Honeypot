@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Connect from "@/components/Connect";
+
 
 const Navbar = () => {
   return (
@@ -19,7 +19,6 @@ const Navbar = () => {
             {/* Other navbar items can be added here */}
           </div>
           <div className="ml-4 flex items-center md:ml-6">
-            <Connect />
           </div>
         </div>
       </div>

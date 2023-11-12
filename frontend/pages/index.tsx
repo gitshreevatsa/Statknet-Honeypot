@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import axios from "axios";
-
+import Head from "next/head";
 type ApiResponseData = {
   token0: string;
   token1: string;
@@ -24,16 +24,20 @@ const Home: React.FC = () => {
 
     try {
       const response = await axios.get<ApiResponse>(
-        `http://localhost:8000/?tokenAddress=${contractAddress}`
+        `http://qoc2vc2k09aab538plivjaje90.ingress.palmito.duckdns.org/?tokenAddress=${contractAddress}`
       );
       setResponseData(response.data);
     } catch (error) {
       console.error("Error making the API call", error);
     }
+    
   };
 
   return (
     <>
+     <Head>
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      </Head>
       <Navbar />
 
       <div
