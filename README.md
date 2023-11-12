@@ -33,7 +33,7 @@ We have hosted an instance to the web If you use that u can skip to Curl Command
 
 Use the URL 
 ```
-http://a33ahet2k9aebelatvvmrt0f0c.ingress.palmito.duckdns.org/
+http://qoc2vc2k09aab538plivjaje90.ingress.palmito.duckdns.org/
 ```
 Clone the repository with this command or run it on codespaces
 ```gh repo clone gitshreevatsa/Statknet-Honeypot```
@@ -58,7 +58,7 @@ curl "http://localhost:8000/?tokenAddress=<ADDRESS_OF_TOKEN>"
 ```
 or 
 ```bash
-curl "http://a33ahet2k9aebelatvvmrt0f0c.ingress.palmito.duckdns.org/?tokenAddress=<ADDRESS_OF_TOKEN>"
+curl "http://qoc2vc2k09aab538plivjaje90.ingress.palmito.duckdns.org/?tokenAddress=<ADDRESS_OF_TOKEN>"
 ```
 Response will be of type json
 ```json
