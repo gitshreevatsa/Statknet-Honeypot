@@ -1,46 +1,52 @@
-%lang starknet
-%builtins range_check
 
-from starkware.cairo.common.default_dict import (
-    default_dict_new, default_dict_finalize)
-from starkware.cairo.common.dict import (
-    dict_write, dict_read, dict_update)
+use starknet::ContractAddress;
 
+#[starknet::interface]
+    trait IHoneypot<TContractState> {
+        fn set_HoneyPot(ref self: TContractState, tokenAddress: ContractAddress, tokenStatus: u16);
+        fn get_if_honeypot(self: @TContractState, tokenAddress: ContractAddress) -> u16;
+        fn get_contract_owner(self: @TContractState) -> ContractAddress;
+    }
 
-@view
-func get_value_of_keys{range_check_ptr}(
-        key_1 : felt, key_2 : felt, key_3 : felt) -> (
-        val_1 : felt, val_2 : felt, val_3 : felt):
-    alloc_locals
+#[starknet::contract]
+mod HoneypotOracle {
+    use starknet::ContractAddress;
+    use starknet::get_caller_address; // Required to use get_caller_address function
 
-    let initial_value = 13
-    let (local dict) = default_dict_new(default_value=initial_value)
-    # Finalize the dictionary. This ensures default value is correct.
-    default_dict_finalize(
-        dict_accesses_start=dict,
-        dict_accesses_end=dict,
-        default_value=initial_value)
+    #[storage]
+    struct Storage {
+        contract_owner: ContractAddress,
+        // TODO: Set types for LegacyMap
+        tokenStatus: LegacyMap::<ContractAddress, u16>
+    }
 
-    # Then add {key: val} pairs.
-    dict_write{dict_ptr=dict}(key=4, new_value=17)  
-    dict_write{dict_ptr=dict}(key=10, new_value=6)  
-
-    # Check {key: value} pair is correct.
-    let (key_4_val) = dict_read{dict_ptr=dict}(key=4)
-    assert key_4_val = 17
+    #[constructor]
+    fn constructor(ref self: ContractState, owner: ContractAddress) {
+        self.contract_owner.write(owner);
+    }
 
 
-    dict_update{dict_ptr=dict}(key=4,
-        prev_value=17, new_value=18) 
+    #[external(v0)]
+    impl Honeypt of super::IHoneypot<ContractState> {
+        fn set_HoneyPot(
+            ref self: ContractState, tokenAddress: ContractAddress, tokenStatus: u16
+        ) {
+            let caller = get_caller_address();
+            let contract_owner = self.get_contract_owner();
+            assert(caller == contract_owner, 'Not_Owner');
+            self.tokenStatus.write(tokenAddress,tokenStatus)
+        }
 
-   
-    let (unused_key_999_val) = dict_read{dict_ptr=dict}(
-        key=999)
-    assert unused_key_999_val = 13
+        fn get_if_honeypot(self: @ContractState, tokenAddress: ContractAddress) -> u16 { // Get user progress
+            self.tokenStatus.read(tokenAddress)
+        }
 
-    # Get value of the requested keys.
-    let (val_1) = dict_read{dict_ptr=dict}(key_1)
-    let (val_2) = dict_read{dict_ptr=dict}(key_2)
-    let (val_3) = dict_read{dict_ptr=dict}(key_3)
-    return (val_1, val_2, val_3)
-end
+        fn get_contract_owner(self: @ContractState) -> ContractAddress {
+            self.contract_owner.read()
+        }
+    }
+}
+
+
+
+
