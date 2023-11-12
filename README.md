@@ -62,39 +62,40 @@ To integrate the Oracle You can simply call the get_if_honeypot function at the 
 
 in goerli for now (But has mainet data)
 ```cairo
-use starknet::{ContractAddress};
+use starknet::{ContractAddress, ContractState};
 
 trait IhoneypotDispatcherTrait<T> {
-fn get_if_honeypot(self: @TContractState, tokenAddress: ContractAddress) -> u16;
+    fn get_if_honeypot(self: @T, token_address: ContractAddress) -> u16;
 }
-struct honeypotDispatcher {
+
+struct HoneypotDispatcher {
     contract_address: ContractAddress,
 }
-impl hobeypotImpl of IhoneypotDispatcherTrait<honeypotDispatcher> {
-    fn get_if_honeypot(
-        self: honeypotDispatcher
-    ) -> u16 { 
-    }
-    
 
+impl IhoneypotDispatcherTrait<HoneypotDispatcher> for HoneypotDispatcher {
+    fn get_if_honeypot(self: @HoneypotDispatcher, token_address: ContractAddress) -> u16 {
+ HoneypotDispatcher .get_if_honeypot(token_address)
+    }
+}
 #[starknet::contract]
 mod HoneypotWrapper {
-    use super::IhoneypotDispatcherTrait;
-    use super::honeypotDispatcher;
+    use super::{IhoneypotDispatcherTrait, HoneypotDispatcher};
     use starknet::ContractAddress;
 
     #[storage]
     struct Storage {}
 
-    impl HoneypotWrapper of IHoneypotWrapper<ContractState> {
-        fn get_if_honeypot (self: @ContractState, contract_address: ContractAddress,token_address:ContractAddress) -> u16 {
-            honeypotDispatcher { contract_address }.get_if_honeypot(token_address)
+    impl HoneypotWrapper of IHoneypotDispatcherTrait<HoneypotDispatcher> {
+        fn get_if_honeypot(
+            self: @ContractState,
+            contract_address: ContractAddress,
+            token_address: ContractAddress,
+        ) -> u16 {
+            HoneypotDispatcher { contract_address }.get_if_honeypot(token_address)
         }
-
     }
 }
 
-}
 ```
 And can be called with any other logic
 ## architecture 
