@@ -1,26 +1,20 @@
 const starknet = require("starknet");
-const fs = require("fs");
 const router = require("./router.json");
 const abi = require("./abi.json");
+const { ethers } = require("ethers");
 
 const provider = new starknet.RpcProvider({
   nodeUrl:
     "https://starknet-mainnet.g.alchemy.com/v2/MMC_IgNUW2z5_iIEYa1PhiNBD_WKOdpo",
 });
 
-async function getEventsFromChain() {
+async function getEventsFromChain(tokenAddress) {
   let eventsRes;
   let eventDataArray = new Set();
 
   console.log("provider =", provider);
 
-  //   const transaction = provider.getTransactionReceipt(
-  //     "0x0237285ac5eded656df24ae938f0512fe1a902f78af9ea3cf268c2fe9b7a8d10"
-  //   );
-  //   console.log(transaction);
-
   let block = await provider.getBlock("latest");
-  // console.log("bloc #", block.block_number);
 
   let continuationToken = "0";
   let chunkNum = 1;
@@ -32,8 +26,7 @@ async function getEventsFromChain() {
       to_block: {
         block_number: block.block_number,
       },
-      address:
-        "0x068f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8",
+      address: tokenAddress,
       keys: [
         [
           "0x99cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9",
@@ -47,27 +40,14 @@ async function getEventsFromChain() {
     console.log(eventsRes);
     const nbEvents = eventsRes.events.length;
     continuationToken = eventsRes.continuation_token;
-    // console.log("chunk nb =", chunkNum, ".", nbEvents, "events recovered.");
-    // console.log("continuation_token =", continuationToken);
+
     for (let i = 0; i < nbEvents; i++) {
       const event = eventsRes.events[i];
-      // console.log(
-      //   "event #",
-      //   i,
-      //   "data length =",
-      //   event.data.length,
-      //   "key length =",
-      //   event.keys.length,
-      //   ":",
-      //   event.transaction_hash
-      // );
 
       const transactionReciept = await provider.getTransactionReceipt(
         event.transaction_hash
       );
       for (j = 0; j < transactionReciept.events.length; j++) {
-        // console.log("transactionReciept =", transactionReciept.events[j].keys);
-
         if (
           transactionReciept.events[j].keys[0] ===
           "0xe316f0d9d2a3affa97de1d99bb2aac0538e2666d0d8545545ead241ef0ccab"
@@ -75,22 +55,19 @@ async function getEventsFromChain() {
           eventDataArray.add(transactionReciept.transaction_hash);
         }
       }
-
-      // eventDataArray.push(event.data);
-      // console.log("\nkeys =", event.keys, "data =", event.data);
     }
-    // console.log("eventDataArray =", eventDataArray, "\n");
+
     chunkNum++;
   }
   const object = { transactions: [...eventDataArray] };
 
   return object;
-
-  // res.status(200).json({ transactions: [...eventDataArray] });
 }
 
 async function debugTransactions(req, res) {
-  const object = await getEventsFromChain();
+  console.log(req.query.tokenAddress);
+  const object = await getEventsFromChain(req.query.tokenAddress);
+
   const transactions = [];
   for (let i = 0; i < object.transactions.length; i++) {
     const transactionReciept = await provider.getTransactionReceipt(
@@ -147,22 +124,28 @@ async function debugTransactions(req, res) {
 
   const obj = { token0Obj, token1Obj };
 
-  await getTokens(obj);
+  const data = await getTokens(obj, req.query.tokenAddress);
 
-  res.status(200).json({
-    hash: transactions[0].transaction_hash,
-    transactions: transfers,
-    newtransactions,
-    token0Obj,
-    token1Obj,
-  });
+  res.status(200).json({ data, transaction: transactions[0].transaction_hash });
 }
 
-async function getTokens(obj) {
+async function getTokens(obj, tokenAddress) {
   const token0 = obj.token0Obj.token;
   const token1 = obj.token1Obj.token;
   const amount0 = obj.token0Obj.amount;
   const amount1 = obj.token1Obj.amount;
+
+  const token0Data = await testABI(token0);
+  const token1Data = await testABI(token1);
+
+  const parsedAmount0 = ethers.formatUnits(
+    amount0.toString(),
+    token0Data.tokenDecimals
+  );
+  const parsedAmount1 = ethers.formatUnits(
+    amount1.toString(),
+    token1Data.tokenDecimals
+  );
 
   const routerContract = new starknet.Contract(
     router,
@@ -172,30 +155,41 @@ async function getTokens(obj) {
 
   console.log("routerContract =", routerContract.functions.get_amounts_out);
 
+  const inputAmount = ethers.parseUnits("1", token0Data.tokenDecimals);
   const getAmountsOut = await routerContract.get_amounts_out(
-    starknet.cairo.uint256(amount0),
-
-    [token0,token1]
+    starknet.cairo.uint256(inputAmount),
+    [token0, token1]
   );
 
   console.log("getAmountsOut =", getAmountsOut.amounts);
-  await testABI()
+  const convertedData = getAmountsOut.amounts.map((item) => ({
+    low: Number(item.low),
+    high: Number(item.high),
+  }));
+
+  const parsedAmountsOut = ethers.formatUnits(
+    convertedData[1]?.low.toString(),
+    token1Data.tokenDecimals
+  );
+
+  console.log("parsedAmountsOut =", parsedAmountsOut);
+  console.log("parsedAmount0 =", parsedAmount0);
+  console.log("parsedAmount1 =", parsedAmount1);
+
+  const totalTokens = parsedAmount0 * parsedAmountsOut;
+  const tax = totalTokens / parsedAmount1;
+
+  const honepotStatus = await honeyPotCheck(tax);
+  console.log("totalTokens =", totalTokens);
+  return {
+    token0: token0Data.tokenName,
+    token1: token1Data.tokenName,
+    tax,
+    isHoneyPot: honepotStatus,
+    tokenAddress : tokenAddress
+  };
 }
 
-async function testABI(){
+// add function to get tokenName and tokenDecimals
 
-  const contract = new starknet.Contract(abi, '0x68f5c6a61780768455de69077e07e89787839bf8166decfbf92b645209c0fb8', provider);
-
-  console.log(await contract.get_name())
-  // const impl = await contract.implementation();
-
-  // console.log(impl);
-  // console.log('Impl: ', '0x' + impl.implementation_hash_.toString(16));
-
-  // const implCompiledClass = await provider.getClassAt('0x' + impl.implementation_hash_.toString(16));
-  // fs.writeFileSync('./implAbiERC.json', starknet.json.stringify(implCompiledClass.abi, undefined,2));
-
-  // console.log(await implementTokenContract.name());
-}
-
-module.exports = { debugTransactions };
+module.exports = { debugTransactions, testABI };
