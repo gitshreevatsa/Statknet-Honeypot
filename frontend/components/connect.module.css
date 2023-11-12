@@ -1,8 +1,33 @@
 .connectbtn {
-    background-color: #008FB9;
-    height: 50px;
-    width: 120px;
-    border-radius: 25px;
-    border: none;
-    cursor: pointer;
+  background-color: #008fb9;
+  height: 50px;
+  width: 120px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.connectbtn:hover {
+  background-color: #007ca9;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.connectbtn:active {
+  background-color: #006d99;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.connectbtn:focus {
+  outline: none;
+  border: 2px solid #005f79;
 }

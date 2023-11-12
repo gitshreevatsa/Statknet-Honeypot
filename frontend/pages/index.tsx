@@ -1,61 +1,113 @@
-// pages/index.js
-import { useState } from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
+import axios from "axios";
 
-export default function Home() {
-  const [blockchain, setBlockchain] = useState("Ethereum");
-  const [contractAddress, setContractAddress] = useState("");
+type ApiResponseData = {
+  token0: string;
+  token1: string;
+  tax: number;
+  isHoneyPot: boolean;
+  tokenAddress: string;
+};
 
-  const handleSubmit = async (event: any) => {
+type ApiResponse = {
+  data: ApiResponseData;
+  transaction: string;
+};
+
+const Home: React.FC = () => {
+  const [contractAddress, setContractAddress] = useState<string>("");
+  const [responseData, setResponseData] = useState<ApiResponse | null>(null);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // You would handle the submission to the backend here
-    console.log(blockchain, contractAddress);
+
+    try {
+      const response = await axios.get<ApiResponse>(
+        `http://localhost:8000/?tokenAddress=${contractAddress}`
+      );
+      setResponseData(response.data);
+    } catch (error) {
+      console.error("Error making the API call", error);
+    }
   };
 
   return (
     <>
       <Navbar />
 
-      <div className="flex min-h-screen flex-col items-center justify-center bg-blue-900">
-        <div className="w-full max-w-4xl p-8 text-white">
-          <h1 className="text-4xl font-bold">Token security detection</h1>
-          <p className="mt-2 text-lg">
-            open, permissionless, user-driven token security detection platform
-          </p>
+      <div
+        className="flex flex-col items-center justify-center"
+        style={{
+          backgroundImage:
+            'url("https://static2.gopluslabs.io/images/token_banner_bg.png?a7185acd115cd7deeebfd1fc7ad7b8f7")',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          minWidth: "1680px", // Set the minimum width you desire
+          minHeight: "768px", // Set the minimum height you desire
+          width: "100%",
+          height: "30vh", // This will make the div take the full height of the viewport
+        }}
+      >
+        <div className="w-full max-w-4xl p-8 text-white bg-blue-900 bg-opacity-75 rounded-lg">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold">Token security detection</h1>
+            <p className="mt-2 text-lg">
+              Open, permissionless, user-driven token security detection
+              platform
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="mt-6">
-            <label htmlFor="blockchain" className="block text-sm font-medium">
-              Blockchain
-            </label>
             <div className="flex mt-1">
-              <select
-                id="blockchain"
-                name="blockchain"
-                value={blockchain}
-                onChange={(e) => setBlockchain(e.target.value)}
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              >
-                {/* Populate with actual options */}
-                <option value="Ethereum">Ethereum</option>
-                <option value="Bitcoin">Bitcoin</option>
-                {/* ...other blockchains */}
-              </select>
               <input
                 type="text"
                 placeholder="Enter contract address"
                 value={contractAddress}
                 onChange={(e) => setContractAddress(e.target.value)}
-                className="block w-full ml-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                className="block w-full rounded-lg border-2 border-gray-300 bg-white bg-opacity-50 shadow-sm p-3 text-gray-700 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 sm:text-sm transition duration-150 ease-in-out"
               />
             </div>
-            <button
-              type="submit"
-              className="mt-4 rounded-md bg-green-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-            >
-              Check
-            </button>
+            <div className="flex justify-center mt-4">
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-md bg-green-500 px-6 py-2 text-sm font-medium text-white shadow-sm transition duration-150 ease-in-out hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                Check
+              </button>
+            </div>
           </form>
+          {responseData && (
+            <div className="response-data mt-6 p-4 w-full max-w-md mx-auto bg-white bg-opacity-90 rounded-lg shadow-lg overflow-hidden">
+              <div className="text-sm text-gray-700 space-y-2">
+                <p className="truncate">
+                  <strong>Token :</strong> {responseData.data.token0}
+                </p>
+                <p className="truncate">
+                  <strong>Token :</strong> {responseData.data.token1}
+                </p>
+                <p className="truncate">
+                  <strong>Tax:</strong> {responseData.data.tax.toFixed(2)}
+                </p>
+                <p className="truncate">
+                  <strong>Is Honey Pot:</strong>{" "}
+                  {responseData.data.isHoneyPot ? "Yes" : "No"}
+                </p>
+                <p className="break-all">
+                  <strong>Token Address:</strong>{" "}
+                  {responseData.data.tokenAddress}
+                </p>
+                <p className="break-words">
+                  <strong>Transaction:</strong> {responseData.transaction}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>
   );
-}
+};
+
+export default Home;
