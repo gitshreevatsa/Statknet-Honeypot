@@ -30,10 +30,9 @@ async function getEventsFromChain(tokenAddress) {
       keys: [
         [
           "0x99cd8bde557814842a3121e8ddfd433a539b8c9f14bf31ebf108d12e6196e9",
-          // "0xe316f0d9d2a3affa97de1d99bb2aac0538e2666d0d8545545ead241ef0ccab",
         ],
       ],
-      chunk_size: 10,
+      chunk_size: 100,
       // continuation_token: continuationToken,
     });
 
