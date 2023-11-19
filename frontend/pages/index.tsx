@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Navbar from "@/components/Navbar";
 import axios from "axios";
@@ -25,7 +24,7 @@ const Home: React.FC = () => {
 
     try {
       const response = await axios.get<ApiResponse>(
-        `https://orange-fortnight-p65gw4qrx5xh6gqw-8000.app.github.dev/?tokenAddress=${contractAddress}`
+        `https://fictional-zebra-qx544pvv6x6345jg-8000.app.github.dev/?tokenAddress=${contractAddress}`
       );
       setResponseData(response.data);
     } catch (error) {
@@ -36,7 +35,9 @@ const Home: React.FC = () => {
 
   return (
     <>
-   
+     <Head>
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      </Head>
       <Navbar />
 
       <div
