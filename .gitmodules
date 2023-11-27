@@ -1,0 +1,3 @@
+[submodule "Ethereum_Implementation"]
+	path = Ethereum_Implementation
+	url = https://github.com/muskbuster/spyderscan.git
